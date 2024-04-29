@@ -15,6 +15,7 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "http-status": "^1.7.4",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.9.7",
     "sequelizer": "^1.1.4"
   }

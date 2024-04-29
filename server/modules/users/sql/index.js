@@ -1,5 +1,6 @@
 "use strict";
 
 module.exports = {
-    registerUser: require("./registerUser_sql"),
+    registerUser: require("../methods/registerUser"),
+    // loginUser: require("../methods/loginUser")
 };

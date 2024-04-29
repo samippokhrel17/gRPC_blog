@@ -1,0 +1,65 @@
+"use strict";
+const httpStatus = require("http-status");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
+
+const { blogService } = require("../rpc/blog_grpc_pb");
+const { LoginResponse } = require("../rpc/blog_pb");
+
+dotenv.config({});
+
+const generateTokens = (userId) => {
+  const accessToken = jwt.sign(
+    { userId },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: "55m" }
+  );
+  const refreshToken = jwt.sign(
+    { userId },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: "7d" }
+  );
+  return { accessToken, refreshToken };
+};
+
+module.exports = async (call, callback) => {
+  try {
+    const email = call.request.getEmail();
+    const password = call.request.getPassword();
+
+    // Assuming loginUser_sql is adjusted to accept gRPC request object
+    const { user, status, message } = await loginUser(email, password);
+
+    if (status === httpStatus.OK) {
+      const hashedPassword = user.getPassword();
+
+      const passwordMatch = await bcrypt.compare(password, hashedPassword);
+
+      if (!passwordMatch) {
+        const response = new LoginResponse();
+        response.setStatus(httpStatus.UNAUTHORIZED);
+        response.setMessage("Invalid password");
+        return callback(null, response);
+      }
+
+      const { accessToken, refreshToken } = generateTokens(user.getId());
+
+      const response = new LoginResponse();
+      response.setStatus(httpStatus.OK);
+      response.setMessage("Login Successful");
+      response.setAccessToken(accessToken);
+      response.setRefreshToken(refreshToken);
+
+      return callback(null, response);
+    } else {
+      const response = new LoginResponse();
+      response.setStatus(status);
+      response.setMessage(message);
+      return callback(null, response);
+    }
+  } catch (error) {
+    console.error(error);
+    return callback(error);
+  }
+};
