@@ -1,0 +1,57 @@
+syntax = "proto3";
+package example.blog;
+
+
+message RegisterUser{
+    string FirstName = 1;
+    string LastName = 2;
+    string email = 3;
+    string password = 4;
+    int32 phoneNumber = 5;
+}
+
+message Response{
+    int32 status =1;
+    string message =2;
+}
+
+// message empty {
+    
+// }
+
+// message readAll{
+//     repeated details data =1;
+// }
+
+
+// message updateRequest{
+//     string id=0;
+//     string FirstName = 1;
+//     string LastName = 2;
+//     int32 CRN = 3;
+//     int64 Contact= 4;
+//     string DOB = 5;
+//     string Guardian = 6;
+//     string Address=7;
+//     bool IsDeleted=8;
+// }
+
+// message requestId{
+//     string id=1;
+
+// }
+
+
+
+// message details{
+//     string FirstName = 1;
+//     string LastName = 2;
+//     int32 CRN = 3;
+//     int64 Contact= 4;
+//     string DOB = 5;
+//     string Guardian = 6;
+//     string Address=7;
+//     bool IsDeleted=8;
+// }
+
+

@@ -1,0 +1,7 @@
+syntax = "proto3";
+package example.blog.rpc;
+import "blog.proto";
+
+service blogService{
+    rpc RegisterUser(example.blog.RegisterUser) returns (example.blog.Response);
+}
