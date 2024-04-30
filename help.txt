@@ -1,65 +1,40 @@
 "use strict";
+
+const { dbHelper } = require("../../../helper");
 const httpStatus = require("http-status");
-const jwt = require("jsonwebtoken");
+const hashHelper = require("../helpers/hashHelper");
 const bcrypt = require("bcrypt");
-const dotenv = require("dotenv");
 
-const { blogService } = require("../rpc/blog_grpc_pb");
-const { LoginResponse } = require("../rpc/blog_pb");
-
-dotenv.config({});
-
-const generateTokens = (userId) => {
-  const accessToken = jwt.sign(
-    { userId },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "55m" }
-  );
-  const refreshToken = jwt.sign(
-    { userId },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "7d" }
-  );
-  return { accessToken, refreshToken };
-};
-
-module.exports = async (call, callback) => {
+module.exports = async (email, password) => {
   try {
-    const email = call.request.getEmail();
-    const password = call.request.getPassword();
+    let response = {
+      status: httpStatus.BAD_REQUEST,
+      message: "Login Failed",
+    };
 
-    // Assuming loginUser_sql is adjusted to accept gRPC request object
-    const { user, status, message } = await loginUser(email, password);
+    let query = `SELECT * FROM blog.user WHERE email = ?`;
+    const [result] = await dbHelper.executeQuery(query, [email]);
 
-    if (status === httpStatus.OK) {
-      const hashedPassword = user.getPassword();
-
-      const passwordMatch = await bcrypt.compare(password, hashedPassword);
-
-      if (!passwordMatch) {
-        const response = new LoginResponse();
-        response.setStatus(httpStatus.UNAUTHORIZED);
-        response.setMessage("Invalid password");
-        return callback(null, response);
-      }
-
-      const { accessToken, refreshToken } = generateTokens(user.getId());
-
-      const response = new LoginResponse();
-      response.setStatus(httpStatus.OK);
-      response.setMessage("Login Successful");
-      response.setAccessToken(accessToken);
-      response.setRefreshToken(refreshToken);
-
-      return callback(null, response);
-    } else {
-      const response = new LoginResponse();
-      response.setStatus(status);
-      response.setMessage(message);
-      return callback(null, response);
+    if (result.length === 0) {
+      return { status: false, message: "User not found" };
     }
+
+    const user = result[0];
+    const hashedPassword = user.password;
+
+    if (!hashedPassword) {
+      return { status: false, message: "User has no password" };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, hashedPassword);
+
+    if (!passwordMatch) {
+      return { status: false, message: "Invalid password" };
+    }
+
+    return { status: true, message: "Login Successful", user };
   } catch (error) {
     console.error(error);
-    return callback(error);
+    throw new Error("Error retrieving user data");
   }
 };

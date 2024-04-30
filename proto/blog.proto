@@ -27,4 +27,10 @@ message LoginResponse {
     string refreshToken = 3;
   }
 
+  message createBlogPost
+  {
+    string description =1;
+    string imageUrl = 2;
+  }
+
 

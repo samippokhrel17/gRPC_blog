@@ -5,4 +5,6 @@ import "blog.proto";
 service blogService{
     rpc RegisterUser(example.blog.RegisterUser) returns (example.blog.Response);
     rpc LoginUser(example.blog.LoginRequest) returns (example.blog.LoginResponse);
+    rpc CreatePostUser(example.blog.createBlogPost) returns (example.blog.Response); 
+
 }
