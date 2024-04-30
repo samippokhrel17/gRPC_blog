@@ -29,7 +29,7 @@ const mysql = require("mysql2/promise");
     try {
       let res = await dbClient.query(query, fields);
       dbClient.query("commit");
-      return res[0];
+      return res;
     } catch (error) {
       console.error("Error", error);
       throw error;

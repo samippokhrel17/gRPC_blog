@@ -29,11 +29,11 @@ module.exports = {
       },
       phoneNumber: {
         allowNull: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("customer");
+    await queryInterface.dropTable("user");
   },
 };

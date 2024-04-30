@@ -6,5 +6,16 @@ service blogService{
     rpc RegisterUser(example.blog.RegisterUser) returns (example.blog.Response);
     rpc LoginUser(example.blog.LoginRequest) returns (example.blog.LoginResponse);
     rpc CreatePostUser(example.blog.createBlogPost) returns (example.blog.Response); 
+    rpc GetAllPost(example.blog.Empty) returns (example.blog.GetAllPostResponse); 
+
+
+}
+
+service onboardingService{
+    rpc RegisterUser(example.blog.RegisterUser) returns (example.blog.Response);
+    rpc LoginUser(example.blog.LoginRequest) returns (example.blog.LoginResponse);
+    rpc CreatePostUser(example.blog.createBlogPost) returns (example.blog.Response); 
+    rpc GetAllPost(example.blog.Empty) returns (example.blog.GetAllPostResponse); 
+
 
 }

@@ -16,6 +16,26 @@ const httpStatus = require("http-status");
       );
       
 
+      const [existingEmail] = await dbHelper.query(
+        `SELECT * FROM blog.user WHERE email = ?`,
+        [call.email]
+      );
+
+      if (existingEmail.length > 0) {
+        return { status: httpStatus.BAD_REQUEST, message: "Email already exists" };
+      }
+
+      // Check if phone number already exists
+      const [existingPhoneNumber] = await dbHelper.query(
+        `SELECT * FROM blog.user WHERE phoneNumber = ?`,
+        [call.phoneNumber]
+      );
+
+      if (existingPhoneNumber.length > 0) {
+        return { status: httpStatus.BAD_REQUEST, message: "Phone number already exists" };
+      }
+
+
       let insert = {
         FirstName: call.FirstName,
         LastName: call.LastName,
@@ -34,8 +54,6 @@ const httpStatus = require("http-status");
       return response;
     } catch (error) {
       throw error;
-    } finally {
-      if (connection) dbHelper.releaseConnection(connection);
     }
   };
 })();

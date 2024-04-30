@@ -20,15 +20,15 @@ const simpleProto = grpc.loadPackageDefinition(packageDefinition);
 // const simpleServiceCtl = require("./modules");
 
 const userServiceLoader = require("./modules/users/sql");
-const loginServiceLoader = require("./modules/users/sql")
+const loginServiceLoader = require("./modules/users/sql");
+const getPostServiceLoader = require("./modules/users/sql")
 
 
 server.addService(simpleProto.example.blog.rpc.blogService.service,{
   registerUser: userServiceLoader.registerUser,
   loginUser: loginServiceLoader.loginUser,
-  CreatePostUser:loginServiceLoader.CreatePostUser
-  
-
+  CreatePostUser:loginServiceLoader.CreatePostUser,
+  getAllPost:getPostServiceLoader.getAllPost,
 });
 
 server.bindAsync(

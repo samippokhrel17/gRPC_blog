@@ -1,40 +1,58 @@
 "use strict";
 
-const { dbHelper } = require("../../../helper");
-const httpStatus = require("http-status");
 const hashHelper = require("../helpers/hashHelper");
-const bcrypt = require("bcrypt");
+const httpStatus = require("http-status");
 
-module.exports = async (email, password) => {
-  try {
-    let response = {
-      status: httpStatus.BAD_REQUEST,
-      message: "Login Failed",
-    };
+(() => {
+  const { dbHelper } = require("../../../helper");
+  module.exports = async (call, callback) => {
+    try {
+      // Generate salt and hash password
+      let generateSalt = await hashHelper.generateSalt();
+      let hashPassword = await hashHelper.hashPassword(call.password, generateSalt);
 
-    let query = `SELECT * FROM blog.user WHERE email = ?`;
-    const [result] = await dbHelper.executeQuery(query, [email]);
+      // Check if email already exists
+      const [existingEmail] = await dbHelper.query(
+        `SELECT * FROM blog.user WHERE email = ?`,
+        [call.email]
+      );
 
-    if (result.length === 0) {
-      return { status: false, message: "User not found" };
+      if (existingEmail.length > 0) {
+        return { status: 400, message: "Email already exists" };
+      }
+
+      // Check if phone number already exists
+      const [existingPhoneNumber] = await dbHelper.query(
+        `SELECT * FROM blog.user WHERE phoneNumber = ?`,
+        [call.phoneNumber]
+      );
+
+      if (existingPhoneNumber.length > 0) {
+        return { status: 400, message: "Phone number already exists" };
+      }
+
+      // Insert new user
+      const insert = {
+        FirstName: call.FirstName,
+        LastName: call.LastName,
+        email: call.email,
+        password: hashPassword,
+        phoneNumber: call.phoneNumber,
+      };
+
+      const [rows] = await dbHelper.query(
+        `INSERT INTO blog.user SET ?`,
+        insert
+      );
+
+      if (rows.insertId > 0) {
+        return { status: 200, message: "User created successfully" };
+      }
+
+      return { status: 400, message: "Register Failed" };
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error registering user");
     }
-
-    const user = result[0];
-    const hashedPassword = user.password;
-
-    if (!hashedPassword) {
-      return { status: false, message: "User has no password" };
-    }
-
-    const passwordMatch = await bcrypt.compare(password, hashedPassword);
-
-    if (!passwordMatch) {
-      return { status: false, message: "Invalid password" };
-    }
-
-    return { status: true, message: "Login Successful", user };
-  } catch (error) {
-    console.error(error);
-    throw new Error("Error retrieving user data");
-  }
-};
+  };
+})();
