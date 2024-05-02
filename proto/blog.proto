@@ -43,3 +43,13 @@ message GetAllPostResponse{
     string message = 2;
     repeated createBlogPost blog = 3;
 }
+
+message LikeRequest{
+    int32 post_id = 1;
+    string like = 2;
+}
+
+message CommentRequest{
+    int32 post_id = 1;
+    string comment = 2;
+}
